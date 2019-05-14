@@ -7,7 +7,7 @@ import (
 
 func main() {
 	hash := md5.New()
-	hash_begin := byte("ckczppom")
+	hash_begin := []byte("ckczppom")
 	hash.Sum(hash_begin)
 	fmt.Println()
 }
