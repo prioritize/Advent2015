@@ -33,9 +33,9 @@ func main() {
 		// Write from the []byte value in hashOut to a []string
 		stringHexValue := hex.EncodeToString(hashOut)
 		// Set testValue equal to the first 5 values in stringHexValue
-		testValue := stringHexValue[0:5]
+		testValue := stringHexValue[0:6]
 		// Check if the first 5 values of hashOut are 0
-		if testValue == "00000" {
+		if testValue == "000000" {
 			// Break out of the for loop when an appropriate value is found
 			break
 		}
