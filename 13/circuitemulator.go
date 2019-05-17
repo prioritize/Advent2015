@@ -9,151 +9,182 @@ import (
 	"strings"
 )
 
+// Operation is an interface for operations that can be fed in through the input text file
 type Operation interface {
-	BitOperation() uint16
+	SetInputs(map[string]string)
+	CheckInputs() bool
+	RShift()
+	Or()
+	LShift()
+	And()
+	Not()
+	Assign()
 }
-type RShift struct {
-	input, offset, output uint16
+
+// Gate is struct that implements a node that takes two inputs and an operation and provides an output
+type Gate struct {
+	inputs     [2]uint16
+	mapInputs  [2]string
+	valuesSet  [2]bool
+	output     [1]uint16
+	mapOutput  [1]string
+	outputBool [1]bool
+	op         [1]string
 }
-type LShift struct {
-	input, offset, output uint16
-}
-type Not struct {
-	input, output uint16
-}
+
+//Assign  is a struct that implements an node that takes one input and an operation and provides an output
 type Assign struct {
-	input, output uint16
-}
-type And struct {
-	input1, input2, output uint16
-}
-type Or struct {
-	input1, input2, output uint16
-}
-
-func (r RShift) BitOperation() uint16 {
-	r.output = r.input >> r.offset
-	return r.output
-}
-func (o Or) BitOperation() uint16 {
-	o.output = o.input1 | o.input2
-	return o.output
-}
-func (l LShift) BitOperation() uint16 {
-	l.output = l.input << l.offset
-	return l.output
-}
-func (a And) BitOperation() uint16 {
-	a.output = a.input1 | a.input2
-	return a.output
-}
-func (n Not) BitOperation() uint16 {
-	n.output = ^n.input
-	return n.output
+	inputs     [1]uint16
+	mapInputs  [1]string
+	valuesSet  [1]bool
+	output     [1]uint16
+	mapOutput  [1]string
+	outputBool [1]bool
+	op         [1]string
 }
 
-func FileToMap() map[string]Operation {
-	newMap := make(map[string]Operation)
-
-	return newMap
+//RShift needs two inputs, a value and a offset and provides an output
+func (g Gate) RShift() {
+	if g.outputBool[0] == false {
+		g.output[0] = g.inputs[0] >> g.inputs[1]
+		g.outputBool[0] = true
+	}
 }
 
-// func DetermineOperation(line []string, op Operation) Operation {
-// 	operations := [5]string{"NOT", "RSHIFT", "OR", "AND", "LSHIFT"}
-// 	for _, v := range line {
-// 		for _, w := range operations {
-// 			if v == w {
-// 				op.op = v
-// 				// fmt.Println(op.op)
-// 				break
-// 			}
-// 		}
-// 	}
-// 	if len(line) == 3 {
-// 		op.op = "ASSIGN"
-// 	}
-// 	return op
-// }
-// func ParseLine(line string) Operation {
-// 	op := Operation{}
-// 	splitLine := strings.Split(line, " ")
-// 	op = DetermineOperation(splitLine, op)
-// 	switch {
-// 	case op.op == "NOT":
-// 		op.inOne = splitLine[1]
-// 		op.out = splitLine[3]
-// 	case op.op == "AND" || op.op == "OR":
-// 		op.inOne = splitLine[0]
-// 		op.inTwo = splitLine[2]
-// 		op.out = splitLine[4]
-// 	case op.op == "RSHIFT" || op.op == "LSHIFT":
-// 		op.inOne = splitLine[0]
-// 		op.inTwo = splitLine[2]
-// 		op.out = splitLine[4]
-// 	case op.op == "ASSIGN":
-// 		op.inOne = splitLine[0]
-// 		op.out = splitLine[2]
-// 	}
-// 	return op
-// }
+//LShift needs two inputs, a value and a offset and provides an output
+func (g Gate) LShift() {
+	if g.outputBool[0] == false {
+		g.output[0] = g.inputs[0] << g.inputs[1]
+		g.outputBool[0] = true
+	}
+}
 
-// func GenerateNodes(commands map[string]Operation) map[string]int {
-// 	nodes := make(map[string]int)
-// 	for _, v := range commands {
-// 		_, e0 := strconv.Atoi(v.inOne)
-// 		if e0 != nil {
-// 			nodes[v.inOne] = -1
-// 		}
-// 		_, e1 := strconv.Atoi(v.inTwo)
-// 		if e1 != nil {
-// 			nodes[v.inTwo] = -1
-// 		}
-// 		_, e2 := strconv.Atoi(v.out)
-// 		if e2 != nil {
-// 			nodes[v.out] = -1
-// 		}
-// 	}
-// 	return nodes
-// }
-// func EvaluateNodes(commands map[string]Operation, nodes map[string]int) (map[string]Operation, map[string]int) {
-// 	for _, v := range commands {
-// 		switch {
-// 		case v.op == "RSHIFT":
-// 			value, err := strconv.Atoi(v.inOne)
-// 			if err == nil {
+// And needs two inputs, two values and provides an output
+func (g Gate) And() {
+	if g.outputBool[0] == false {
+		g.output[0] = g.inputs[0] & g.inputs[1]
+		g.outputBool[0] = true
+	}
+}
 
-// 			}
-// 		case v.op == "LSHIFT":
-// 			value, err := strconv.Atoi(v.inOne)
-// 			if err == nil {
+// Or needs two inputs, two values and provides an output
+func (g Gate) Or() {
+	if g.outputBool[0] == false {
+		g.output[0] = g.inputs[0] | g.inputs[1]
+		g.outputBool[0] = true
+	}
+}
 
-// 			}
-// 		case v.op == "NOT":
-// 			value, err := strconv.Atoi(v.inOne)
-// 			if err == nil {
+// Not is not implemented as it is not required
+func (g Gate) Not() {
+	// Not Implemented. Not is an Assign function
+}
 
-// 			}
-// 		case v.op == "ASSIGN":
-// 			value, err := strconv.Atoi(v.inOne)
-// 			if err == nil {
+// Assign is not implemented as it is not required
+func (g Gate) Assign() {
+	// Not implemented. Assign is an Assign function
+}
 
-// 			}
-// 		}
+// CheckInputs loops through the valuesSet slice and checks for any falses. If false, return false, else return true
+func (g Gate) CheckInputs() bool {
+	// TODO: Loop through the valuesSet bool, if all all are true, return true
+	// TODO: Can perform some error checking here and check the values in the map to ensure no errors  were made
+	for _, v := range g.valuesSet {
+		if v == false {
+			return false
+		}
+		return true
+	}
+	return true
+}
 
-// 		if err == nil {
-// 			// The values are available
-// 		}
-// 	}
+// RShift is not implemented as it is not required
+func (a Assign) RShift() {
+	//Not implemented. RShift is a Gate function
+}
 
-// 	return commands, nodes
-// }
+// LShift is not implemented as it is not required
+func (a Assign) LShift() {
+	// Not implemented. LShift is a Gate function
+}
+
+// And is not implemented as it is not required
+func (a Assign) And() {
+	// Not implemented. LShift is a Gate function
+}
+
+// Or is not implemented as it is not required
+func (a Assign) Or() {
+	// Not implemented. LShift is a Gate function
+}
+
+// Not requires one input. It provides one output
+func (a Assign) Not() {
+	if a.outputBool[0] == false {
+		a.output[0] = ^a.inputs[0]
+		a.outputBool[0] = true
+	}
+}
+
+// Assign requires one input. It provides one output
+func (a Assign) Assign() {
+	if a.outputBool[0] == false {
+		a.output[0] = a.inputs[0]
+		a.outputBool[0] = true
+	}
+}
+
+func (a Assign) CheckInputs() bool {
+
+}
+
+// SetInputs checks the values in the map and if they are integers places them into the input values in the RShift object
+func (g Gate) SetInputs(m map[string]string) {
+	// Get the values from the map to check if they are integers
+	for i, v := range g.mapInputs {
+		elem := m[v]
+		mapValue, e := strconv.Atoi(elem)
+		if (e) == nil {
+			g.inputs[i] = uint16(mapValue)
+		}
+	}
+}
+
+// SetInputs checks the values in the map and if they are integers places them into the input values in the RShift object
+func (a Assign) SetInputs(m map[string]string) {
+	// Get the values from the map to check if they are integers
+	for i, v := range a.mapInputs {
+		elem := m[v]
+		mapValue, e := strconv.Atoi(elem)
+		if e == nil {
+			a.inputs[i] = uint16(mapValue)
+		}
+	}
+}
+
+// MakeGate processes a line and returns a Gate
+func MakeGate(line []string) Gate {
+	var g Gate
+	g.mapInputs[0] = line[0]
+	g.mapInputs[1] = line[2]
+	g.op[0] = line[1]
+	g.mapOutput[0] = line[4]
+	return g
+}
+
+// MakeAssign processes a line and returns a Gate
+func MakeAssign(line []string) Assign {
+	var a Assign
+	return a
+}
 
 func main() {
 	file, err := os.Open("input.txt")
 	if err != nil {
 		panic(err)
 	}
-	objectCommand := make(map[string]Operation)
+	// objectCommand := make(map[string]Operation)
+	nodeSlice := make([]Operation, 0)
 	commands := make(map[string]Operation)
 	nodes := make(map[string]int)
 	bufferedFile := bufio.NewReader(file)
@@ -164,12 +195,19 @@ func main() {
 			break
 		}
 		trimmedLine := strings.TrimRight(string(line), "\n")
-		commands[strconv.Itoa(index)] = ParseLine(trimmedLine)
+		splitLine := strings.Split(trimmedLine, " ")
+
+		switch {
+		case splitLine[1] == "OR" || splitLine[1] == "AND" || splitLine[1] == "RSHIFT" || splitLine[1] == "LSHIFT":
+			nodeSlice = append(nodeSlice, MakeGate(splitLine))
+		case splitLine[0] == "NOT" || splitLine[1] == "->":
+			nodeSlice = append(nodeSlice, MakeAssign(splitLine))
+		}
+
 		elem := commands[strconv.Itoa(index)]
 		fmt.Printf("Element %d: %s\n", index, elem)
 		index++
 	}
-	// nodes = GenerateNodes(commands)
 	fmt.Println(nodes)
 	elem := commands["0"]
 	fmt.Println(nodes["a"])
