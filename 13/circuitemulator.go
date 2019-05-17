@@ -135,7 +135,9 @@ func (a Assign) Assign() {
 }
 
 func (a Assign) CheckInputs() bool {
-
+	// TODO: Loop through the valuesSet bool, if all all are true, return true
+	// TODO: Can perform some error checking here and check the values in the map to ensure no errors  were made
+	return true
 }
 
 // SetInputs checks the values in the map and if they are integers places them into the input values in the RShift object
@@ -174,6 +176,7 @@ func MakeGate(line []string) Gate {
 
 // MakeAssign processes a line and returns a Gate
 func MakeAssign(line []string) Assign {
+	// TODO: finish this implementation
 	var a Assign
 	return a
 }
@@ -203,6 +206,7 @@ func main() {
 		case splitLine[0] == "NOT" || splitLine[1] == "->":
 			nodeSlice = append(nodeSlice, MakeAssign(splitLine))
 		}
+		// TODO: Start looping through nodeSlice to build the objects
 
 		elem := commands[strconv.Itoa(index)]
 		fmt.Printf("Element %d: %s\n", index, elem)
