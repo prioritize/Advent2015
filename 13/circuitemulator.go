@@ -212,7 +212,7 @@ func main() {
 		fmt.Printf("Element %d: %s\n", index, elem)
 		index++
 	}
-	fmt.Println(nodes)
+	fmt.Println(nodeSlice)
 	elem := commands["0"]
 	fmt.Println(nodes["a"])
 	fmt.Println(elem)
