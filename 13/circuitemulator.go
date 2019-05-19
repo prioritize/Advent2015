@@ -94,7 +94,6 @@ func (g Gate) CheckInputs() bool {
 		if v == false {
 			return false
 		}
-		return true
 	}
 	return true
 }
@@ -153,7 +152,12 @@ func (a Assign) CheckInputs() bool {
 		if v == false {
 			return false
 		}
-		return true
+	}
+	// TODO: Consider executing the operation here and copying the calculated value into it's location in the dictionary
+	switch {
+	case a.op[0] == "ASSIGN":
+		a.Assign()
+		fmt.Println("a.Assign() called")
 	}
 	return true
 }
@@ -166,6 +170,7 @@ func (g Gate) SetInputs(m map[string]string) {
 		mapValue, e := strconv.Atoi(elem)
 		if (e) == nil {
 			g.inputs[i] = uint16(mapValue)
+			g.valuesSet[i] = true
 		}
 	}
 }
@@ -178,6 +183,7 @@ func (a Assign) SetInputs(m map[string]string) {
 		mapValue, e := strconv.Atoi(elem)
 		if e == nil {
 			a.inputs[i] = uint16(mapValue)
+			a.valuesSet[i] = true
 		}
 	}
 }
@@ -187,6 +193,9 @@ func MakeGate(line []string) Gate {
 	var g Gate
 	g.mapInputs[0] = line[0]
 	g.mapInputs[1] = line[2]
+	// TODO: Possibly call SetInputs from this location
+	// TODO: Would require changing SetInputs to return a Gate instead of a map
+	// TODO: May make a large amount of sense to not remove large value passes
 	for i, v := range g.mapInputs {
 		w, err := strconv.Atoi(v)
 		if err == nil {
@@ -201,7 +210,9 @@ func MakeGate(line []string) Gate {
 
 // MakeAssign processes a line and returns a Gate
 func MakeAssign(line []string) Assign {
-	// TODO: finish this implementation
+	// TODO: Possibly call SetInputs from this location
+	// TODO: Would require changing SetInputs to return a Gate instead of a map
+	// TODO: May make a large amount of sense to not remove large value passes
 	var a Assign
 	if line[0] == "NOT" {
 		a.mapInputs[0] = line[1]
@@ -219,7 +230,6 @@ func MakeAssign(line []string) Assign {
 			a.valuesSet[i] = true
 		}
 	}
-
 	return a
 }
 
@@ -246,7 +256,6 @@ func main() {
 	// objectCommand := make(map[string]Operation)
 	nodeSlice := make([]Operation, 0)
 	nodeValues := make(map[string]string, 0)
-	nodes := make(map[string]int)
 	bufferedFile := bufio.NewReader(file)
 	index := 0
 	for {
@@ -266,6 +275,8 @@ func main() {
 		nodeValues = BuildMap(splitLine, nodeValues)
 		index++
 	}
+	// TODO: Need to return the values from CheckInputs as I'm passing by value and discarding the value -- Need to return the Gate or Assign
+	// TODO: and store it back in nodeSlice at the appropriate index
 	for _, v := range nodeSlice {
 		if v.CheckInputs() == true {
 			fmt.Println(v)
@@ -274,7 +285,6 @@ func main() {
 	// TODO: Build the dictionary of objects
 	// TODO: Parse through them and start placing values
 	// fmt.Println(nodeSlice)
-	fmt.Println(nodes["a"])
 	fmt.Println(nodeValues)
 	fmt.Println(len(nodeValues))
 }
