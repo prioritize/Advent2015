@@ -12,13 +12,13 @@ import (
 // Operation is an interface for operations that can be fed in through the input text file
 type Operation interface {
 	SetInputs(map[string]string)
-	CheckInputs() bool
+	CheckInputs() (Operation, bool)
 	RShift()
 	Or()
 	LShift()
 	And()
 	Not()
-	Assign()
+	Assign() Operation
 	GetOp() string
 }
 
@@ -82,20 +82,21 @@ func (g Gate) Not() {
 }
 
 // Assign is not implemented as it is not required
-func (g Gate) Assign() {
+func (g Gate) Assign() Operation {
 	// Not implemented. Assign is an Assign function
+	return g
 }
 
 // CheckInputs loops through the valuesSet slice and checks for any falses. If false, return false, else return true
-func (g Gate) CheckInputs() bool {
+func (g Gate) CheckInputs() (Operation, bool) {
 	// TODO: Loop through the valuesSet bool, if all all are true, return true
 	// TODO: Can perform some error checking here and check the values in the map to ensure no errors  were made
 	for _, v := range g.valuesSet {
 		if v == false {
-			return false
+			return g, false
 		}
 	}
-	return true
+	return g, true
 }
 
 // RShift is not implemented as it is not required
@@ -127,11 +128,12 @@ func (a Assign) Not() {
 }
 
 // Assign requires one input. It provides one output
-func (a Assign) Assign() {
+func (a Assign) Assign() Operation {
 	if a.outputBool[0] == false {
 		a.output[0] = a.inputs[0]
 		a.outputBool[0] = true
 	}
+	return a
 }
 
 // GetOp returns g.op[0]
@@ -145,21 +147,21 @@ func (a Assign) GetOp() string {
 }
 
 // CheckInputs loops through all inputBool values (valuesSet) and if all return true returns true
-func (a Assign) CheckInputs() bool {
+func (a Assign) CheckInputs() (Operation, bool) {
 	// TODO: Loop through the valuesSet bool, if all all are true, return true
 	// TODO: Can perform some error checking here and check the values in the map to ensure no errors  were made
+	var b Operation
 	for _, v := range a.valuesSet {
 		if v == false {
-			return false
+			return a, false
 		}
 	}
 	// TODO: Consider executing the operation here and copying the calculated value into it's location in the dictionary
 	switch {
 	case a.op[0] == "ASSIGN":
-		a.Assign()
-		fmt.Println("a.Assign() called")
+		b = a.Assign()
 	}
-	return true
+	return b, true
 }
 
 // SetInputs checks the values in the map and if they are integers places them into the input values in the RShift object
@@ -275,11 +277,15 @@ func main() {
 		nodeValues = BuildMap(splitLine, nodeValues)
 		index++
 	}
-	// TODO: Need to return the values from CheckInputs as I'm passing by value and discarding the value -- Need to return the Gate or Assign
-	// TODO: and store it back in nodeSlice at the appropriate index
-	for _, v := range nodeSlice {
-		if v.CheckInputs() == true {
-			fmt.Println(v)
+
+	// TODO: Return nodes from all the Gate and Assign functions to enable storing of the values in the object slice
+	// TODO: Add function that checks for truth in the outputBool, if true, set the output value into the key value in the map
+	for i, v := range nodeSlice {
+		node, check := v.CheckInputs()
+		if check == true {
+			nodeSlice[i] = node
+			fmt.Println(node)
+			fmt.Println(nodeSlice[i])
 		}
 	}
 	// TODO: Build the dictionary of objects
