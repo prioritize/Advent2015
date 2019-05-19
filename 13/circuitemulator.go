@@ -19,6 +19,7 @@ type Operation interface {
 	And()
 	Not()
 	Assign()
+	GetOp() string
 }
 
 // Gate is struct that implements a node that takes two inputs and an operation and provides an output
@@ -134,9 +135,26 @@ func (a Assign) Assign() {
 	}
 }
 
+// GetOp returns g.op[0]
+func (g Gate) GetOp() string {
+	return g.op[0]
+}
+
+// GetOp returns g.op[0]
+func (a Assign) GetOp() string {
+	return a.op[0]
+}
+
+// CheckInputs loops through all inputBool values (valuesSet) and if all return true returns true
 func (a Assign) CheckInputs() bool {
 	// TODO: Loop through the valuesSet bool, if all all are true, return true
 	// TODO: Can perform some error checking here and check the values in the map to ensure no errors  were made
+	for _, v := range a.valuesSet {
+		if v == false {
+			return false
+		}
+		return true
+	}
 	return true
 }
 
@@ -169,6 +187,13 @@ func MakeGate(line []string) Gate {
 	var g Gate
 	g.mapInputs[0] = line[0]
 	g.mapInputs[1] = line[2]
+	for i, v := range g.mapInputs {
+		w, err := strconv.Atoi(v)
+		if err == nil {
+			g.inputs[i] = uint16(w)
+			g.valuesSet[i] = true
+		}
+	}
 	g.op[0] = line[1]
 	g.mapOutput[0] = line[4]
 	return g
@@ -178,7 +203,39 @@ func MakeGate(line []string) Gate {
 func MakeAssign(line []string) Assign {
 	// TODO: finish this implementation
 	var a Assign
+	if line[0] == "NOT" {
+		a.mapInputs[0] = line[1]
+		a.mapOutput[0] = line[3]
+		a.op[0] = line[0]
+	} else {
+		a.mapInputs[0] = line[0]
+		a.mapOutput[0] = line[2]
+		a.op[0] = "ASSIGN"
+	}
+	for i, v := range a.mapInputs {
+		w, err := strconv.Atoi(v)
+		if err == nil {
+			a.inputs[i] = uint16(w)
+			a.valuesSet[i] = true
+		}
+	}
+
 	return a
+}
+
+// BuildMap builds a map from a provided []string and returns a map[string]string. The file needs to be in the format provided by Advent Of Code
+func BuildMap(line []string, m map[string]string) map[string]string {
+	for _, v := range line {
+		if v == "RSHIFT" || v == "LSHIFT" || v == "OR" || v == "AND" || v == "NOT" || v == "->" {
+			continue
+		} else {
+			_, err := strconv.Atoi(v)
+			if err != nil {
+				m[v] = ""
+			}
+		}
+	}
+	return m
 }
 
 func main() {
@@ -188,7 +245,7 @@ func main() {
 	}
 	// objectCommand := make(map[string]Operation)
 	nodeSlice := make([]Operation, 0)
-	commands := make(map[string]Operation)
+	nodeValues := make(map[string]string, 0)
 	nodes := make(map[string]int)
 	bufferedFile := bufio.NewReader(file)
 	index := 0
@@ -206,14 +263,18 @@ func main() {
 		case splitLine[0] == "NOT" || splitLine[1] == "->":
 			nodeSlice = append(nodeSlice, MakeAssign(splitLine))
 		}
-		// TODO: Start looping through nodeSlice to build the objects
-
-		elem := commands[strconv.Itoa(index)]
-		fmt.Printf("Element %d: %s\n", index, elem)
+		nodeValues = BuildMap(splitLine, nodeValues)
 		index++
 	}
-	fmt.Println(nodeSlice)
-	elem := commands["0"]
+	for _, v := range nodeSlice {
+		if v.CheckInputs() == true {
+			fmt.Println(v)
+		}
+	}
+	// TODO: Build the dictionary of objects
+	// TODO: Parse through them and start placing values
+	// fmt.Println(nodeSlice)
 	fmt.Println(nodes["a"])
-	fmt.Println(elem)
+	fmt.Println(nodeValues)
+	fmt.Println(len(nodeValues))
 }
