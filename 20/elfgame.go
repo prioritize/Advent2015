@@ -46,11 +46,10 @@ func main() {
 		loops++
 		offset = 0
 		input = b.String()
-		if loops == 40 {
+		if loops == 50 {
 			break
 		}
 		b.Reset()
 	}
 	fmt.Println(len(b.String()))
-
 }
