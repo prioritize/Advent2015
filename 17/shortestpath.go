@@ -10,19 +10,25 @@ import (
 	"strings"
 )
 
+// Location defines functions to be used in City
 type Location interface {
 	GetDistance() (int, bool)
 	GetName() string
 	Map()
 }
+
+// City holds the values for a City
 type City struct {
 	name           string
 	destinationMap map[string]int
 }
 
+// GetName returns the name of the city
 func (c City) GetName() string {
 	return c.name
 }
+
+// GetDistance returns the distance between the city object and a city name
 func (c City) GetDistance(city string) (int, bool) {
 	elem, e := c.destinationMap[city]
 	if e == false {
@@ -31,6 +37,8 @@ func (c City) GetDistance(city string) (int, bool) {
 	return elem, e
 
 }
+
+//LocationExists determines if a location exists in a slice of cities
 func LocationExists(locations []City, specific string) bool {
 	for _, v := range locations {
 		if v.GetName() == specific {
@@ -40,14 +48,18 @@ func LocationExists(locations []City, specific string) bool {
 	}
 	return false
 }
+
+// DestinationExists determines if a city is listed in a cities dictionary
 func DestinationExists(city City, destination string) bool {
-	for k, _ := range city.destinationMap {
+	for k := range city.destinationMap {
 		if k == destination {
 			return true
 		}
 	}
 	return false
 }
+
+// GetCity returns a city from a slice of cities
 func GetCity(cities []City, name string) (City, bool, int) {
 	var outCity City
 	var index int
@@ -59,6 +71,8 @@ func GetCity(cities []City, name string) (City, bool, int) {
 	}
 	return outCity, false, index
 }
+
+// CreateCity creates a new City object and instantiates the default values
 func CreateCity(name string) City {
 	var newCity City
 	newCity.name = name
@@ -67,6 +81,8 @@ func CreateCity(name string) City {
 
 	return newCity
 }
+
+// AddDestination addes a destination and distance to a city
 func AddDestination(thisCity City, name string, distance string) City {
 	value, err := strconv.Atoi(distance)
 	if err != nil {
@@ -75,26 +91,32 @@ func AddDestination(thisCity City, name string, distance string) City {
 	thisCity.destinationMap[name] = value
 	return thisCity
 }
+
+// Permute generates all the possible permutations give a supplied string. Return will be !len([]string)
 func Permute(in []string) [][]string {
 	c := make([]int, len(in))
 	out := make([][]string, 0)
+	iteration := make([]string, len(in))
+	copy(iteration, in)
+
 	for i := range out {
 		out[i] = make([]string, 0)
 	}
-	fmt.Println(in)
-	out = append(out, in)
+	out = append(out, iteration)
 	i := 0
-	for i < len(in) {
+	for i < len(iteration) {
+		test := make([]string, len(in))
 		if c[i] < i {
 			if i%2 == 0 {
-				in[0], in[i] = in[i], in[0]
+				iteration[0], iteration[i] = iteration[i], iteration[0]
 			} else {
-				in[c[i]], in[i] = in[i], in[c[i]]
+				iteration[c[i]], iteration[i] = iteration[i], iteration[c[i]]
 			}
-			fmt.Println(in)
-			out = append(out, in)
+			// out = append(out, iteration)
 			c[i]++
 			i = 0
+			copy(test, iteration)
+			out = append(out, test)
 		} else {
 			c[i] = 0
 			i++
@@ -102,6 +124,8 @@ func Permute(in []string) [][]string {
 	}
 	return out
 }
+
+// CheckMultiples checks if a city exists in a slice
 func CheckMultiples(cities []string, city string) bool {
 	for _, v := range cities {
 		if v == city {
@@ -111,7 +135,7 @@ func CheckMultiples(cities []string, city string) bool {
 	return false
 }
 func main() {
-	file, _ := os.Open("test_input.txt")
+	file, _ := os.Open("input.txt")
 	fileReader := bufio.NewReader(file)
 	maps := make([][]byte, 0)
 	cityNames := make([]string, 0)
@@ -134,7 +158,6 @@ func main() {
 	for _, v := range maps {
 		input := strings.Split(string(v), " ")
 		origin := input[start]
-		fmt.Println(input)
 		destination := input[end]
 		distance := input[d]
 		locations := make([]string, 0)
@@ -160,52 +183,27 @@ func main() {
 		cityNames = append(cityNames, v.name)
 	}
 	out := Permute(cityNames)
-	for _, v := range out {
-		fmt.Println(v)
-	}
 	runningTotal := 0
-	var path []string
 	min := 1000000
+	max := 0
 	for _, v := range out {
 		for j := 0; j < len(v)-1; j++ {
 			city1, _, _ := GetCity(cities, v[j])
 			interim, _ := city1.GetDistance(v[j+1])
-			// fmt.Println(city1.name, v[j+1], "Interim: ", interim)
 			runningTotal += interim
 		}
 		if runningTotal < min {
 			min = runningTotal
-			path = v
+		}
+		if runningTotal > max {
+			max = runningTotal
 		}
 		// fmt.Println(runningTotal)
+		// fmt.Println(min)
+		// fmt.Println(max)
 		runningTotal = 0
 	}
-
-	fmt.Println(path)
-	// fmt.Println(min)
-	for _, v := range cities {
-		fmt.Println(v)
-	}
-	str1 := "London"
-	str2 := "Dublin"
-	str3 := "Belfast"
-
-	var test1 []string
-	var test2 []string
-
-	test1 = append(test1, str3)
-	test1 = append(test1, str2)
-	test1 = append(test1, str1)
-
-	test2 = append(test2, str1)
-	test2 = append(test2, str2)
-	test2 = append(test2, str3)
-
-	fmt.Println(test1)
-	fmt.Println(test2)
-	var test3 [][]string
-	test3 = append(test3, test1)
-	test3 = append(test3, test2)
-	fmt.Println(test3)
+	fmt.Println(min)
+	fmt.Println(max)
 
 }
