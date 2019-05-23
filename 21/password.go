@@ -2,6 +2,7 @@ package main
 
 import "fmt"
 
+// CheckDisallowed checks if any of the disallowed characters are in the input
 func CheckDisallowed(input []byte) bool {
 	// i, o and l are disallowed
 	for _, v := range input {
@@ -11,6 +12,8 @@ func CheckDisallowed(input []byte) bool {
 	}
 	return false
 }
+
+// GenerateNext returns the next password
 func GenerateNext(input []byte) []byte {
 	// 8 runes, all lower case, rolling over from z->a
 	rollover := true
@@ -28,24 +31,63 @@ func GenerateNext(input []byte) []byte {
 	}
 	return input
 }
-func ContainsStraight(input []byte) bool {
-	return true
-}
-func ContainsPairs(input []byte) bool {
-	return true
-}
-func HandleRollover(input []byte) {
 
+// ContainsStraight checks for 3 increasing characters in a row
+func ContainsStraight(input []byte) bool {
+	for i := 0; i < len(input)-2; i++ {
+
+		if input[i] == (input[i+1]-1) && input[i] == (input[i+2]-2) {
+			return true
+		}
+	}
+	return false
+}
+
+// ContainsPairs checks for matching characters, returns when 2 are found
+func ContainsPairs(input []byte) bool {
+	pairCount := 0
+	var firstPair byte
+	for i := 0; i < len(input)-1; i++ {
+		if input[i] == input[i+1] {
+			if pairCount == 0 {
+				firstPair = input[i]
+				pairCount++
+				i++
+			}
+			if pairCount == 1 {
+				if firstPair == input[i] {
+					continue
+				} else {
+					pairCount++
+					i++
+				}
+			}
+		}
+	}
+	if pairCount > 1 {
+		return true
+	}
+	return false
+}
+func GenerateNextPassword(input []byte) []byte {
+	for {
+		GenerateNext(input)
+		if !CheckDisallowed(input) {
+			if ContainsPairs(input) {
+				if ContainsStraight(input) {
+					// fmt.Println(string(input))
+					break
+				}
+			}
+		}
+	}
+	return input
 }
 func main() {
 	input := []byte("hepxcrrq")
-	for {
-
-		GenerateNext(input)
-		if !CheckDisallowed(input) {
-			fmt.Println("valid")
-		}
-		fmt.Println("invalid")
-	}
+	output := GenerateNextPassword(input)
+	fmt.Println(string(output))
+	output = GenerateNextPassword(output)
+	fmt.Println(string(output))
 
 }
