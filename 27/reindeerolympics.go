@@ -27,7 +27,7 @@ func CreateReindeer(name string, speed, duration, rest int) Reindeer {
 	deer.period = duration + rest
 	return deer
 }
-func CalculcateDistance(deer Reindeer, duration int) int {
+func CalculateDistance(deer Reindeer, duration int) int {
 	var cycles int
 	var distance int
 	cycles = duration / deer.period
@@ -61,7 +61,7 @@ func main() {
 		}
 	}
 	for _, v := range team {
-		fmt.Println(CalculcateDistance(v, 2503))
+		fmt.Println(CalculateDistance(v, 2503))
 	}
 
 }
