@@ -4,7 +4,7 @@ type display struct {
 	values [][]int
 }
 type Pixel struct {
-	x, y int
+	y, x int
 }
 
 func (d display) Neighbors(pixel Pixel) int {
@@ -42,36 +42,49 @@ func NewDisplay(pixel Pixel) display {
 	}
 	return disp
 }
+
 func (d *display) ReplaceDisplay(newDisplay [][]int) {
 	d.values = newDisplay
 }
+
 func (d display) GetDisplay() [][]int {
 	return d.values
 }
-func (d *display) Animate() {
+
+func (d *display) Animate(corners bool) {
 	nextDisplay := make([][]int, len(d.values))
 	outDisplay := make([][]int, len(d.values))
 	for i := range nextDisplay {
 		nextDisplay[i] = make([]int, len(d.values[0]))
 		outDisplay[i] = make([]int, len(d.values[0]))
-
 	}
-	for i := 0; i < len(d.values); i++ {
-		for j := 0; j < len(d.values[0]); j++ {
-			nextDisplay[i][j] = d.Neighbors(NewPixel(i, j))
+	for i, v := range d.values {
+		for j := range v {
+			nextDisplay[j][i] = d.Neighbors(NewPixel(i, j))
 		}
 	}
-
-	for i := 0; i < len(d.values); i++ {
-		for j := 0; j < len(d.values[0]); j++ {
-			outDisplay[i][j] = test(d.values[i][j], nextDisplay[i][j])
+	for i, v := range d.values {
+		for j := range v {
+			outDisplay[j][i] = test(d.values[j][i], nextDisplay[j][i])
 		}
 	}
 	d.values = outDisplay
+	if corners {
+		d.stuckCorners()
+	}
 }
+func (d *display) stuckCorners() {
+	lenX := len(d.values) - 1
+	lenY := len(d.values) - 1
+	d.values[0][0] = 1
+	d.values[0][lenY] = 1
+	d.values[lenX][0] = 1
+	d.values[lenX][lenY] = 1
+}
+
 func test(previous, neighbors int) int {
 	switch {
-	case previous == 1 && (2 == neighbors || 3 == neighbors):
+	case previous == 1 && (neighbors == 2 || neighbors == 3):
 		return 1
 	case previous == 0 && neighbors == 3:
 		return 1

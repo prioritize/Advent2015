@@ -18,7 +18,6 @@ func main() {
 	for i := range lights {
 		lights[i] = make([]int, 0)
 	}
-	disp := display.NewDisplay(display.NewPixel(100, 100))
 	lightRow := make([]int, 0)
 	for {
 		l, e := fileReader.ReadByte()
@@ -37,24 +36,12 @@ func main() {
 			fmt.Println("Default")
 		}
 	}
+	disp := display.NewDisplay(display.NewPixel(len(lights[0]), len(lights)))
 	disp.ReplaceDisplay(lights)
-	// count := 0
-	// for i := 0; i < 100; i++ {
-	// 	for j := 0; j < 100; j++ {
-	// 		fmt.Println(disp.Neighbors(display.NewPixel(i, j)))
-	// 		count++
-	// 	}
-	// }
-	// fmt.Println(count)
-	i := 0
-	for i < 100 {
-		disp.Animate()
-		i++
+	iterations := 0
+	for iterations < 100 {
+		disp.Animate(false)
+		iterations++
 	}
 	fmt.Println(disp.SumDisplay())
-	// fmt.Println(disp.GetDisplay())
-
-	// fmt.Println(lights)
-	// fmt.Println(len(lights))
-	// fmt.Println(len(lights[0]))
 }
